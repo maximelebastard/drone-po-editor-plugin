@@ -6,7 +6,7 @@ LANGUAGES=$(curl -X POST https://api.poeditor.com/v2/languages/list \
 # loop through available languages for the app
 for row in $(echo "${LANGUAGES}" | jq -r '.[] | @base64'); do
     _jq() {
-     echo ${row} | base64 --decode | jq -r ${1}
+     echo ${row} | base64 -d | jq -r ${1}
     }
 
    languagesJson=$(_jq '.languages')
@@ -16,7 +16,7 @@ done
 languagesArray=()
 for row2 in $(echo "${languagesJson}" | jq -r '.[] | @base64'); do
     _jq() {
-     echo ${row2} | base64 --decode | jq -r ${1}
+     echo ${row2} | base64 -d | jq -r ${1}
     }
 
    # Storing language codes in array
