@@ -12,8 +12,8 @@ pipeline:
     image: maximelebastard/drone-po-editor-plugin
     po_files_path: ./maybe/a/subdirectory/of/the/project
     secrets:
-      POEDITOR_API_TOKEN
-      POEDITOR_PROJECT_ID
+      - POEDITOR_API_TOKEN
+      - POEDITOR_PROJECT_ID
     when:
       event: deployment
 ```
