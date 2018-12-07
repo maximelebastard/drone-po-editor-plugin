@@ -4,6 +4,24 @@
 [ -z "$POEDITOR_PROJECT_ID" ] && echo "Please set the \"poeditor_project_id\" secret" && exit 1;
 [ -z "$PLUGIN_PO_FILES_PATH" ] && echo "Please set the \"po_files_path\" parameter" && exit 1;
 
+#----
+## Format 'xx-xx' or 'xx' to xx-XX
+## @param $1 string language code. Example: en-gb or fr or fr-FR
+#----
+formatPoFilename () {
+    if [[ $1 != *"-"* ]]; then
+        language="$1"
+        region="$1"
+    else
+        language=${1%%-*}
+        region=${1#*-}
+    fi
+
+    regionUpper=`echo "${region}" | tr '[a-z]' '[A-Z]'`
+
+    echo "$language-$regionUpper"
+}
+
 # Get languages list for the specified project
 LANGUAGES=$(curl -X POST https://api.poeditor.com/v2/languages/list \
      -d api_token="${POEDITOR_API_TOKEN}" \
@@ -34,18 +52,16 @@ poFilesUrls=()
 for element in "${languagesArray[@]}"
 do
     # Generate a link to download the language po file
-    POFILE=$(curl -X POST https://api.poeditor.com/v2/projects/export \
+    poFile=$(curl -X POST https://api.poeditor.com/v2/projects/export \
      -d api_token="${POEDITOR_API_TOKEN}" \
      -d id="${POEDITOR_PROJECT_ID}" \
      -d language="${element}" \
      -d type="po")
 
-    POFILEURL=$( echo "${POFILE}"| jq -r '.result.url' )
+    poFileUrl=$( echo "${poFile}"| jq -r '.result.url' )
 
-    # Output a format "fr-fr" instead of just "fr" if needed
-    if [[ $element != *"-"* ]]; then
-        curl -0 "$POFILEURL" -o "$PLUGIN_PO_FILES_PATH$element"-"$element".po
-    else
-        curl -0 "$POFILEURL" -o "$PLUGIN_PO_FILES_PATH$element".po
-    fi
+    poFilename=`formatPoFilename $element`
+
+    # Download and store the file
+    curl -0 "$poFileUrl" -o "$PLUGIN_PO_FILES_PATH$poFilename".po
 done
