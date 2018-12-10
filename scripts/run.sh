@@ -65,3 +65,7 @@ do
     # Download and store the file
     curl -0 "$poFileUrl" -o "$PLUGIN_PO_FILES_PATH$poFilename".po
 done
+
+# Display files downloaded
+cd "$PLUGIN_PO_FILES_PATH"
+ls -l
